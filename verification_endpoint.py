@@ -37,6 +37,7 @@ def verify():
         verifier = verify_algorand
 
     #Check if signature is valid
+    print(sig, payload)
     result = verifier(sig, payload)  #Should only be true if signature validates
     return jsonify(result)
 
