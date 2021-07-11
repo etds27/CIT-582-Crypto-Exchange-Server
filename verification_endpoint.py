@@ -26,7 +26,7 @@ def verify():
 
     missing_keys = [x for x in ["message", "pk", "platform"] if x not in payload.keys()]
 
-    if not len(missing_keys):
+    if len(missing_keys):
         return {'status': 400,
                    'message': "Malformed data. Missing payload keys",
             }
@@ -41,7 +41,7 @@ def verify():
     return jsonify(result)
 
 def verify_ethereum(sig, payload):
-    signable_message = eth_account.messages.encode_defunct(text=payload["message"].encode("utf-8"))
+    signable_message = eth_account.messages.encode_defunct(text=payload["message"])
     recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
 
     if recovered_address == payload["pk"]:
