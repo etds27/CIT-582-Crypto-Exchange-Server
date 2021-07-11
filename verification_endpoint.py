@@ -42,8 +42,10 @@ def verify():
 
 def verify_ethereum(sig, payload):
     signable_message = eth_account.messages.encode_defunct(text=payload["message"])
-    recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
-
+    try:
+        recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
+    except:
+        return False
     if recovered_address == payload["pk"]:
         return True
     return False
