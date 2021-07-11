@@ -18,20 +18,31 @@ def verify():
            return {'status': 400,
                    'message': "Malformed data. No sig or payload",
             }
+    
 
-    if content['platform'] == "ethereum":
+
+    sig = content["sig"]
+    payload = content["payload"]
+
+    missing_keys = [x for x in ["message", "pk", "platform"] if x not in payload.keys()]
+
+    if not len(missing_keys):
+        return {'status': 400,
+                   'message': "Malformed data. Missing payload keys",
+            }
+
+    if payload['platform'].lower() == "ethereum":
         verifier = verify_ethereum
-    elif content['platform'] == "algorand":
+    elif payload['platform'].lower() == "algorand":
         verifier = verify_algorand
-    pprint.pprint(content)
 
     #Check if signature is valid
-    result = verifier(content['sig'], content['payload'])  #Should only be true if signature validates
+    result = verifier(sig, payload)  #Should only be true if signature validates
     return jsonify(result)
 
 def verify_ethereum(sig, payload):
-    signable_message = eth_account.messages.encode_defunct(text=payload["message"])
-    recovered_address == eth_account.Account.recover_message(signable_message, sig)
+    signable_message = eth_account.messages.encode_defunct(text=payload["message"].encode("utf-8"))
+    recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
 
     if recovered_address == payload["pk"]:
         return True
