@@ -18,8 +18,6 @@ def verify():
            return {'status': 400,
                    'message': "Malformed data. No sig or payload",
             }
-    
-
 
     sig = content["sig"]
     payload = content["payload"]
@@ -42,9 +40,11 @@ def verify():
     return jsonify(result)
 
 def verify_ethereum(sig, payload):
-    signable_message = eth_account.messages.encode_defunct(text=payload["message"])
+    jsonified_dict = json.dumps(payload)
+    signable_message = eth_account.messages.encode_defunct(text=jsonified_dict)
     try:
         recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
+        print(recovered_address)
     except:
         return False
     if recovered_address == payload["pk"]:
@@ -52,7 +52,8 @@ def verify_ethereum(sig, payload):
     return False
 
 def verify_algorand(sig, payload):
-    if algosdk.util.verify_bytes(payload["message"].encode('utf-8'), sig, payload["pk"]):
+    jsonified_dict = json.dumps(payload)
+    if algosdk.util.verify_bytes(payload["message"].encode('utf-8'), sig, payload):
         return True
     return False
 
