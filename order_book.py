@@ -83,7 +83,7 @@ def process_matching_orders(order, matching_orders):
         if result.sell_amount > order.buy_amount:
             new_sell_amt = result.sell_amount - order.buy_amount
             ratio = result.sell_amount / float(result.buy_amount)
-            new_buy_amt = int(new_sell_amt / ratio) + (new_sell_amt % ratio > 0)
+            new_buy_amt = new_sell_amt // ratio
             new_order = dict(buy_currency=result.buy_currency, sell_currency=result.sell_currency,
                              buy_amount=new_buy_amt, sell_amount=new_sell_amt, sender_pk=result.sender_pk,
                              receiver_pk=result.receiver_pk, creator_id=result.id)
@@ -100,7 +100,7 @@ def process_matching_orders(order, matching_orders):
         elif result.sell_amount < order.buy_amount:
             new_buy_amt = order.buy_amount - result.sell_amount
             ratio = order.buy_amount / float(order.sell_amount)
-            new_sell_amount = int(new_buy_amt / ratio)
+            new_sell_amount = new_buy_amt // ratio + (new_buy_amt % ratio > 0)
             new_order = dict(buy_currency=order.buy_currency, sell_currency=order.sell_currency,
                              buy_amount=new_buy_amt, sell_amount=new_sell_amount, sender_pk=order.sender_pk,
                              receiver_pk=order.receiver_pk, creator_id=order.id)
