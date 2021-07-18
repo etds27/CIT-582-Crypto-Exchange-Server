@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import random
 from models import Base, Order
-import progressbar
+#import progressbar
 
 engine = create_engine('sqlite:///orders.db')
 Base.metadata.bind = engine
@@ -28,16 +28,20 @@ def make_order(platform):
     return order
 
 
+import order_book
 from order_book import process_order
 
 order_list = []
 num_orders = 100
-bar = progressbar.ProgressBar(max_value=num_orders,
-                              widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+#bar = progressbar.ProgressBar(maxval=num_orders,
+#                              widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+#bar.start()
 for i in range(num_orders):
-    bar.update(i + 1)
+    #bar.update(i + 1)
     platforms = ["Algorand", "Ethereum"]
     order_dict = make_order(platforms[random.randint(0, 1)])
     order_list.append(order_dict)
     process_order(order_dict)
-bar.finish()
+for order in order_book.session.execute("SELECT * FROM orders"):
+    print(order)
+#bar.finish()

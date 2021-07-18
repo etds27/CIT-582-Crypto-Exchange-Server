@@ -32,6 +32,5 @@ class Order(Base):
     child = relationship("Order", foreign_keys='Order.creator_id', backref=backref('creator', remote_side=[
         id]))  # set "child" and "creator" to be the derived Order and creating Order objects associated.
 
-
 engine = create_engine('sqlite:///orders.db')
 Base.metadata.create_all(engine)
