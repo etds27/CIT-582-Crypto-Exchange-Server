@@ -47,17 +47,16 @@ def verify_ethereum(sig, payload):
     signable_message = eth_account.messages.encode_defunct(text=jsonified_dict)
     try:
         recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
-        print(recovered_address)
     except:
         return False
-    if recovered_address == payload["pk"]:
+    if recovered_address == payload["sender_pk"]:
         return True
     return False
 
 
 def verify_algorand(sig, payload):
     jsonified_dict = json.dumps(payload)
-    if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["pk"]):
+    if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["sender_pk"]):
         return True
     return False
 
