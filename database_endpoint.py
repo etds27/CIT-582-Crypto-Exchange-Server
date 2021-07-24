@@ -113,8 +113,8 @@ def trade():
         payload = content["payload"]
 
         if verify(sig, payload):
-            order_obj = Order(sender_pk=payload["sender_pk"], receiver_pk=content["receiver_pk"],
-                              buy_currency=payload["buy_currency"], sell_currency=content["sell_currency"],
+            order_obj = Order(sender_pk=payload["sender_pk"], receiver_pk=payload["receiver_pk"],
+                              buy_currency=payload["buy_currency"], sell_currency=payload["sell_currency"],
                               buy_amount=payload["buy_amount"], sell_amount=payload["sell_amount"],
                               signature=sig)
             g.session.add(order_obj)
