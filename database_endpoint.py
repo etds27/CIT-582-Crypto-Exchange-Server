@@ -123,8 +123,7 @@ def trade():
         else:
             log_message(payload)
 
-        # Your code here
-        # Note that you can access the database session using g.session
+        return jsonify(True)
 
 
 @app.route('/order_book', methods=['GET', 'POST'])
