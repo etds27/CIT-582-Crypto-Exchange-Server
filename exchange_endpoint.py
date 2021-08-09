@@ -26,7 +26,7 @@ DBSession = sessionmaker(bind=engine)
 
 app = Flask(__name__)
 
-mnemonic_secret = "YOUR MNEMONIC HERE"
+mnemonic_secret = "upper learn noodle occur rely soon shallow gossip ring orange sadness enhance gather tattoo pigeon gorilla ladder leader drive luggage cake fabric main abstract dress"
 
 
 @app.before_request
