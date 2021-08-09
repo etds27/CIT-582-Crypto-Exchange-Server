@@ -200,8 +200,6 @@ def verify_ethereum(sig, payload):
 
 
 def verify_algorand(sig, payload):
-    payload.pop("platform")
-    payload.pop("pk")
     jsonified_dict = json.dumps(payload)
     if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["sender_pk"]):
         return True
