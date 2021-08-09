@@ -183,9 +183,11 @@ def verify_ethereum(sig, payload):
     try:
         recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
     except:
+        print("Unable to recover ethereum address: %s" % str(payload))
         return False
     if recovered_address == payload["sender_pk"]:
         return True
+    print("Addresses do not match: %s != %s" % (recovered_address, payload["sender_pk"]))
     return False
 
 
@@ -193,6 +195,7 @@ def verify_algorand(sig, payload):
     jsonified_dict = json.dumps(payload)
     if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["sender_pk"]):
         return True
+    print("Unable to verify algorand transaction: %s" % str(payload))
     return False
 
 
