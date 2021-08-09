@@ -19,6 +19,7 @@ import traceback
 from web3 import Web3
 from web3.auto import w3
 
+import send_tokens
 from models import Order, Base, Log, TX
 
 engine = create_engine('sqlite:///orders.db')
@@ -168,7 +169,8 @@ def verify_algorand_transaction(order, tx_id):
     print("attempting to verify algorand transaction")
     _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
     print("Getting exchange account: %s" % str(exchange_pk))
-    tx = algosdk.v2client.indexer.search_transactions(txid=tx_id)
+    acl = send_tokens.connect_to_algo("indexer")
+    tx = acl.search_transactions(txid=tx_id)
     print("Searched with indexer")
     # If txid doesnt exist
     if len(tx) == 0:
