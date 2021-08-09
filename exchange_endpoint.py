@@ -378,7 +378,7 @@ def address():
 @app.route('/trade', methods=['POST'])
 def trade():
     if request.method == "POST":
-
+        print()
         content = request.get_json(silent=True)
         print(f"content = {json.dumps(content)}")
         columns = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "platform",
@@ -414,6 +414,7 @@ def trade():
                      signature=sig, tx_id=payload["tx_id"], platform=payload["sell_currency"])
 
             valid_transaction = False
+            print("Created order dict %s" % str(d))
             if payload["sell_currency"].lower() == "ethereum":
                 valid_transaction = verify_ethereum_transaction(d, tx_id=d["tx_id"])
             elif payload["sell_currency"].lower() == "algorand":
@@ -426,6 +427,7 @@ def trade():
                 execute_txes(d)
 
             else:
+                print("Transaction unable to be verified")
                 log_message(payload)
                 return jsonify(False)
         else:
