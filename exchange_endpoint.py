@@ -1,3 +1,5 @@
+import web3.exceptions
+from algosdk import mnemonic
 from flask import Flask, request, g
 from flask_restful import Resource, Api
 from sqlalchemy import create_engine, text
@@ -9,15 +11,22 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import load_only
 from datetime import datetime
+import math
 import sys
+import traceback
 
-from models import Base, Order, Log
+from web3 import Web3
+from web3.auto import w3
+
+from models import Order, Base, Log, TX
 
 engine = create_engine('sqlite:///orders.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 app = Flask(__name__)
+
+mnemonic_secret = "YOUR MNEMONIC HERE"
 
 
 @app.before_request
@@ -32,17 +41,138 @@ def shutdown_session(response_or_exc):
     g.session.remove()
 
 
+from send_tokens import connect_to_algo, connect_to_eth, send_tokens_algo, send_tokens_eth
+
 """ Suggested helper methods """
 
 
-def fill_order(order, txes=[]):
-    pass
+def connect_to_blockchains():
+    try:
+        # If g.acl has not been defined yet, then trying to query it fails
+        acl_flag = False
+        g.acl
+    except AttributeError as ae:
+        acl_flag = True
+
+    try:
+        if acl_flag or not g.acl.status():
+            # Define Algorand client for the application
+            g.acl = connect_to_algo()
+    except Exception as e:
+        print("Trying to connect to algorand client again")
+        print(traceback.format_exc())
+        g.acl = connect_to_algo()
+
+    try:
+        icl_flag = False
+        g.icl
+    except AttributeError as ae:
+        icl_flag = True
+
+    try:
+        if icl_flag or not g.icl.health():
+            # Define the index client
+            g.icl = connect_to_algo(connection_type='indexer')
+    except Exception as e:
+        print("Trying to connect to algorand indexer client again")
+        print(traceback.format_exc())
+        g.icl = connect_to_algo(connection_type='indexer')
+
+    try:
+        w3_flag = False
+        g.w3
+    except AttributeError as ae:
+        w3_flag = True
+
+    try:
+        if w3_flag or not g.w3.isConnected():
+            g.w3 = connect_to_eth()
+    except Exception as e:
+        print("Trying to connect to web3 again")
+        print(traceback.format_exc())
+        g.w3 = connect_to_eth()
+
+
+def get_algo_keys(mnemonic_secret):
+    # TODO: Generate or read (using the mnemonic secret)
+    # the algorand public/private keys
+    algo_sk = mnemonic.to_private_key(mnemonic_secret)
+    algo_pk = mnemonic.to_public_key(mnemonic_secret)
+    return algo_sk, algo_pk
+
+
+def get_eth_keys(mnemonic_secret):
+    # TODO: Generate or read (using the mnemonic secret)
+    # the ethereum public/private keys
+    acct = w3.eth.account.from_mnemonic(mnemonic_secret)
+    eth_pk = acct._address
+    eth_sk = acct._private_key
+    return eth_sk, eth_pk
+
+
+def execute_txes(txes):
+    if txes is None:
+        return True
+    if len(txes) == 0:
+        return True
+    print(f"Trying to execute {len(txes)} transactions")
+    print(f"IDs = {[tx['order_id'] for tx in txes]}")
+    eth_sk, eth_pk = get_eth_keys(mnemonic_secret)
+    algo_sk, algo_pk = get_algo_keys(mnemonic_secret)
+
+    if not all(tx['platform'] in ["Algorand", "Ethereum"] for tx in txes):
+        print("Error: execute_txes got an invalid platform!")
+        print(tx['platform'] for tx in txes)
+
+    algo_txes = [tx for tx in txes if tx['platform'] == "Algorand"]
+    eth_txes = [tx for tx in txes if tx['platform'] == "Ethereum"]
+
+    # TODO:
+    #       1. Send tokens on the Algorand and eth testnets, appropriately
+    #          We've provided the send_tokens_algo and send_tokens_eth skeleton methods in send_tokens.py
+    #       2. Add all transactions to the TX table
+    send_tokens_eth(g.w3, eth_sk, eth_txes)
+    send_tokens_algo(g.acl, algo_sk, algo_txes)
 
 
 def log_message(d):
     log = Log(message=json.dumps(d))
     g.session.add(log)
     g.session.commit()
+
+
+def verify_ethereum_transaction(order, tx_id):
+    exchange_pk, _ = get_eth_keys(mnemonic_secret)
+    try:
+        tx = w3.eth.get_transaction(tx_id)
+        if not (
+                tx['value'] == order['sell_amount'] and
+                tx['from'] == order['sender_pk'] and
+                tx['to'] == exchange_pk
+        ):
+            return False
+    except web3.exceptions.TransactionNotFound:
+        return False
+
+    return True
+
+
+def verify_algorand_transaction(order, tx_id):
+    exchange_pk, _ = get_algo_keys(mnemonic_secret)
+    tx = algosdk.v2client.indexer.serach_transactions(txid=tx_id)
+
+    # If txid doesnt exist
+    if len(tx) == 0:
+        return False
+    tx_dict = tx.dictify()
+
+    if not (
+            tx_dict['sender'] == order['sender_pk'] and
+            tx_dict['amt'] == order['sell_amount'] and
+            tx_dict['receiver'] == exchange_pk
+    ):
+        return False
+    return True
 
 
 def verify_ethereum(sig, payload):
@@ -168,7 +298,18 @@ def insert_order(order):
                       buy_amount=order['buy_amount'],
                         sell_amount=order['sell_amount'])"""
     order_obj = Order(**order)
+
+    tx_dict = dict(
+        platform=order.sell_currency,
+        receiver_pk=order.receiver_pk,
+        order_id=order_obj.id,
+        tx_id=order.tx_id
+    )
+
+    tx = TX(**tx_dict)
+
     g.session.add(order_obj)
+    g.session.add(tx)
     g.session.flush()
     g.session.commit()
 
@@ -202,12 +343,32 @@ def find_existing_matching_orders(order):
 """ End of helper methods """
 
 
+@app.route('/address', methods=['POST'])
+def address():
+    if request.method == "POST":
+        content = request.get_json(silent=True)
+        if 'platform' not in content.keys():
+            print(f"Error: no platform provided")
+            return jsonify("Error: no platform provided")
+        if not content['platform'] in ["Ethereum", "Algorand"]:
+            print(f"Error: {content['platform']} is an invalid platform")
+            return jsonify(f"Error: invalid platform provided: {content['platform']}")
+
+        if content['platform'].lower() == "ethereum":
+            eth_pk, eth_sk = get_eth_keys(mnemonic_secret)
+            return jsonify(eth_pk)
+        if content['platform'].lower() == "algorand":
+            algo_pk, algo_sk = get_algo_keys(mnemonic_secret)
+            return jsonify(algo_pk)
+
+
 @app.route('/trade', methods=['POST'])
 def trade():
     if request.method == "POST":
         content = request.get_json(silent=True)
         print(f"content = {json.dumps(content)}")
-        columns = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "platform"]
+        columns = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "platform",
+                   "tx_id"]
         fields = ["sig", "payload"]
         error = False
         for field in fields:
@@ -234,13 +395,24 @@ def trade():
             d = dict(sender_pk=payload["sender_pk"], receiver_pk=payload["receiver_pk"],
                      buy_currency=payload["buy_currency"], sell_currency=payload["sell_currency"],
                      buy_amount=payload["buy_amount"], sell_amount=payload["sell_amount"],
-                     signature=sig)
+                     signature=sig, tx_id=payload["tx_id"], platform=payload["sell_currency"])
 
-            process_order(d)
+            valid_transaction = False
+            if payload["sell_currency"].lower() == "ethereum":
+                valid_transaction = verify_ethereum_transaction(d, tx_id=d["tx_id"])
+            elif payload["sell_currency"].lower() == "algorand":
+                valid_transaction = verify_algorand_transaction(d, tx_id=d["tx_id"])
+
+            if valid_transaction:
+                process_order(d)
+                execute_txes(d)
+
+            else:
+                log_message(payload)
+                return jsonify(False)
         else:
             log_message(payload)
             return jsonify(False)
-        # TODO: Fill the order
         # TODO: Be sure to return jsonify(True) or jsonify(False) depending on if the method was successful
 
         return jsonify(True)
@@ -250,7 +422,7 @@ def trade():
 def order_book():
     result = dict(data=[])
     result_keys = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount",
-                   "signature"]
+                   "signature", "tx_id"]
     statement = "SELECT %s FROM orders" % ",".join(result_keys)
     orders = g.session.execute(statement)
 
