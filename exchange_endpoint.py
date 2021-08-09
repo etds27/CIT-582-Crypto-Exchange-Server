@@ -152,8 +152,13 @@ def verify_ethereum_transaction(order, tx_id):
                 tx['from'] == order['sender_pk'] and
                 tx['to'] == exchange_pk
         ):
+            print("Unable to verify ethereum transaction: %s == %s, %s == %s, %s == %s" % (
+                tx['from'], order['sender_pk'], tx['value'], order['sell_amount'], tx['to'],
+                exchange_pk))
             return False
+
     except web3.exceptions.TransactionNotFound:
+        print("ETH Transaction not found")
         return False
 
     return True
@@ -173,6 +178,7 @@ def verify_algorand_transaction(order, tx_id):
             tx_dict['amt'] == order['sell_amount'] and
             tx_dict['receiver'] == exchange_pk
     ):
+        print("Unable to verify algorand transaction: %s == %s, %s == %s, %s == %s" % (tx_dict['sender'], order['sender_pk'], tx_dict['amt'],order['sell_amount'], tx_dict['receiver'], exchange_pk) )
         return False
     return True
 
@@ -195,7 +201,7 @@ def verify_algorand(sig, payload):
     jsonified_dict = json.dumps(payload)
     if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["sender_pk"]):
         return True
-    print("Unable to verify algorand transaction: %s" % str(payload))
+    print("Unable to verify algorand signature: %s" % str(payload))
     return False
 
 
