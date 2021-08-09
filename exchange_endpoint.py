@@ -46,6 +46,7 @@ def shutdown_session(response_or_exc):
 
 from send_tokens import connect_to_algo, connect_to_eth, send_tokens_algo, send_tokens_eth
 
+
 """ Suggested helper methods """
 
 
@@ -166,12 +167,12 @@ def verify_ethereum_transaction(order, tx_id):
 
 
 def verify_algorand_transaction(order, tx_id):
+
     print("attempting to verify algorand transaction")
     _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
     print("Getting exchange account: %s" % str(exchange_pk))
-    acl = send_tokens.connect_to_algo("indexer")
     print("Connected to indexer")
-    tx = acl.search_transactions(txid=tx_id)
+    tx = g.icl.search_transactions(txid=tx_id)
     print("Searched with indexer")
     # If txid doesnt exist
     if len(tx) == 0:
@@ -191,7 +192,6 @@ def verify_algorand_transaction(order, tx_id):
 
 def verify_ethereum(sig, payload):
     payload.pop("platform")
-    payload.pop("pk")
     jsonified_dict = json.dumps(payload)
     signable_message = eth_account.messages.encode_defunct(text=jsonified_dict)
     try:
@@ -206,6 +206,7 @@ def verify_ethereum(sig, payload):
 
 
 def verify_algorand(sig, payload):
+    payload.pop("platform")
     jsonified_dict = json.dumps(payload)
     if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["sender_pk"]):
         return True
@@ -461,4 +462,5 @@ def order_book():
 
 
 if __name__ == '__main__':
+    connect_to_blockchains()
     app.run(port='5002')
