@@ -193,7 +193,7 @@ def verify_ethereum(sig, payload):
         return False
     if recovered_address == payload["sender_pk"]:
         return True
-    print("Addresses do not match: %s != %s" % (recovered_address, payload["sender_pk"]))
+    print("Addresses do not match: %s != %s | %s" % (recovered_address, payload["sender_pk"], str(payload)))
     return False
 
 
