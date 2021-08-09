@@ -1,7 +1,8 @@
 import web3.exceptions
 from algosdk import mnemonic
+from eth_account import Account
 from flask import Flask, request, g
-from flask_restful import Resource, Api
+# from flask_restful import Resource, Api
 from sqlalchemy import create_engine, text
 from flask import jsonify
 import json
@@ -26,8 +27,9 @@ DBSession = sessionmaker(bind=engine)
 
 app = Flask(__name__)
 
-mnemonic_secret = "upper learn noodle occur rely soon shallow gossip ring orange sadness enhance gather tattoo pigeon gorilla ladder leader drive luggage cake fabric main abstract dress"
-
+Account.enable_unaudited_hdwallet_features()
+eth_mnemonic_secret = "apart inmate find husband neck foam pool large afraid brother pilot behave mechanic equal enact depth unit duty magic interest engine project gap discover"
+algo_mnemonic_secret = "upper learn noodle occur rely soon shallow gossip ring orange sadness enhance gather tattoo pigeon gorilla ladder leader drive luggage cake fabric main abstract dress"
 
 @app.before_request
 def create_session():
@@ -117,8 +119,8 @@ def execute_txes(txes):
         return True
     print(f"Trying to execute {len(txes)} transactions")
     print(f"IDs = {[tx['order_id'] for tx in txes]}")
-    eth_sk, eth_pk = get_eth_keys(mnemonic_secret)
-    algo_sk, algo_pk = get_algo_keys(mnemonic_secret)
+    eth_sk, eth_pk = get_eth_keys(eth_mnemonic_secret)
+    algo_sk, algo_pk = get_algo_keys(algo_mnemonic_secret)
 
     if not all(tx['platform'] in ["Algorand", "Ethereum"] for tx in txes):
         print("Error: execute_txes got an invalid platform!")
@@ -142,7 +144,7 @@ def log_message(d):
 
 
 def verify_ethereum_transaction(order, tx_id):
-    exchange_pk, _ = get_eth_keys(mnemonic_secret)
+    exchange_pk, _ = get_eth_keys(eth_mnemonic_secret)
     try:
         tx = w3.eth.get_transaction(tx_id)
         if not (
@@ -158,7 +160,7 @@ def verify_ethereum_transaction(order, tx_id):
 
 
 def verify_algorand_transaction(order, tx_id):
-    exchange_pk, _ = get_algo_keys(mnemonic_secret)
+    exchange_pk, _ = get_algo_keys(algo_mnemonic_secret)
     tx = algosdk.v2client.indexer.serach_transactions(txid=tx_id)
 
     # If txid doesnt exist
@@ -355,10 +357,10 @@ def address():
             return jsonify(f"Error: invalid platform provided: {content['platform']}")
 
         if content['platform'].lower() == "ethereum":
-            eth_pk, eth_sk = get_eth_keys(mnemonic_secret)
-            return jsonify(eth_pk)
+            eth_pk, eth_sk = get_eth_keys(eth_mnemonic_secret)
+            return jsonify(eth_pk.hex())
         if content['platform'].lower() == "algorand":
-            algo_pk, algo_sk = get_algo_keys(mnemonic_secret)
+            algo_pk, algo_sk = get_algo_keys(algo_mnemonic_secret)
             return jsonify(algo_pk)
 
 
