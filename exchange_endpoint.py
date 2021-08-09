@@ -184,6 +184,7 @@ def verify_algorand_transaction(order, tx_id):
 
 
 def verify_ethereum(sig, payload):
+    payload.pop("platform")
     jsonified_dict = json.dumps(payload)
     signable_message = eth_account.messages.encode_defunct(text=jsonified_dict)
     try:
