@@ -144,7 +144,7 @@ def log_message(d):
 
 
 def verify_ethereum_transaction(order, tx_id):
-    exchange_pk, _ = get_eth_keys(eth_mnemonic_secret)
+    _, exchange_pk = get_eth_keys(eth_mnemonic_secret)
     try:
         tx = w3.eth.get_transaction(tx_id)
         if not (
@@ -166,9 +166,10 @@ def verify_ethereum_transaction(order, tx_id):
 
 def verify_algorand_transaction(order, tx_id):
     print("attempting to verify algorand transaction")
-    exchange_pk, _ = get_algo_keys(algo_mnemonic_secret)
+    _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
+    print("Getting exchange account: %s" % str(exchange_pk))
     tx = algosdk.v2client.indexer.search_transactions(txid=tx_id)
-
+    print("Searched with indexer")
     # If txid doesnt exist
     if len(tx) == 0:
         print("Transaction ID %s doesnt exist" % str(tx_id))
