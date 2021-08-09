@@ -430,7 +430,7 @@ def trade():
                 log_message("Verified transaction %s" % d["tx_id"])
                 print("Verified transaction %s" % d["tx_id"])
                 process_order(d)
-                execute_txes(d)
+                execute_txes([payload])
 
             else:
                 print("Transaction unable to be verified")
