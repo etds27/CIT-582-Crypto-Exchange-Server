@@ -28,7 +28,7 @@ DBSession = sessionmaker(bind=engine)
 app = Flask(__name__)
 
 Account.enable_unaudited_hdwallet_features()
-eth_mnemonic_secret = "apart inmate find husband neck foam pool large afraid brother pilot behave mechanic equal enact depth unit duty magic interest engine project gap discover"
+acct, eth_mnemonic_secret = Account.create_with_mnemonic()
 algo_mnemonic_secret = "upper learn noodle occur rely soon shallow gossip ring orange sadness enhance gather tattoo pigeon gorilla ladder leader drive luggage cake fabric main abstract dress"
 
 @app.before_request
@@ -357,8 +357,8 @@ def address():
             return jsonify(f"Error: invalid platform provided: {content['platform']}")
 
         if content['platform'].lower() == "ethereum":
-            eth_pk, eth_sk = get_eth_keys(eth_mnemonic_secret)
-            return jsonify(eth_pk.hex())
+            eth_sk, eth_pk = get_eth_keys(eth_mnemonic_secret)
+            return jsonify(eth_pk)
         if content['platform'].lower() == "algorand":
             algo_pk, algo_sk = get_algo_keys(algo_mnemonic_secret)
             return jsonify(algo_pk)
