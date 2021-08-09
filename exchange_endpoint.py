@@ -360,7 +360,7 @@ def address():
             eth_sk, eth_pk = get_eth_keys(eth_mnemonic_secret)
             return jsonify(eth_pk)
         if content['platform'].lower() == "algorand":
-            algo_pk, algo_sk = get_algo_keys(algo_mnemonic_secret)
+            algo_sk, algo_pk = get_algo_keys(algo_mnemonic_secret)
             return jsonify(algo_pk)
 
 

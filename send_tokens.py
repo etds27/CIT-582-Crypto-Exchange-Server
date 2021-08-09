@@ -3,7 +3,7 @@
 from algosdk.v2client import algod
 from algosdk.v2client import indexer
 from algosdk import account
-from algosdk.future import transaction
+from algosdk import transaction
 
 
 def connect_to_algo(connection_type=''):
@@ -37,7 +37,14 @@ def send_tokens_algo(acl, sender_sk, txes):
 
     tx_ids = []
     for i, tx in enumerate(txes):
-        unsigned_tx = transaction.PaymentTxn(sender_pk, params, tx['receiver_pk'], tx['sell_amount'])
+        gen = params.gen
+        gh = params.gh
+        first_valid_round = params.first
+        last_valid_round = params.last
+        fee = params.min_fee
+
+        unsigned_tx = transaction.PaymentTxn(sender=sender_pk, fee=fee, first=first_valid_round, last=last_valid_round,
+                                             gh=gh, receiver=tx['receiver_pk'], amt=tx['sell_amount'], gen=gen)
 
         # TODO: Sign the transaction
         signed_tx = unsigned_tx.sign(sender_sk)
