@@ -167,7 +167,6 @@ def verify_ethereum_transaction(order, tx_id):
 
 
 def verify_algorand_transaction(order, tx_id):
-
     print("attempting to verify algorand transaction")
     _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
     print("Getting exchange account: %s" % str(exchange_pk))
@@ -191,7 +190,6 @@ def verify_algorand_transaction(order, tx_id):
 
 
 def verify_ethereum(sig, payload):
-    payload.pop("platform")
     jsonified_dict = json.dumps(payload)
     signable_message = eth_account.messages.encode_defunct(text=jsonified_dict)
     try:
