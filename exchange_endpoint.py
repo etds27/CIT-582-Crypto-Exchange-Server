@@ -170,6 +170,7 @@ def verify_algorand_transaction(order, tx_id):
     _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
     print("Getting exchange account: %s" % str(exchange_pk))
     acl = send_tokens.connect_to_algo("indexer")
+    print("Connected to indexer")
     tx = acl.search_transactions(txid=tx_id)
     print("Searched with indexer")
     # If txid doesnt exist
