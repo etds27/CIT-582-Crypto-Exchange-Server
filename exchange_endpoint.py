@@ -392,6 +392,7 @@ def trade():
                    "tx_id"]
         fields = ["sig", "payload"]
         error = False
+        connect_to_blockchains()
         for field in fields:
             if field not in content.keys():
                 print(f"{field} not received by Trade")
@@ -462,5 +463,4 @@ def order_book():
 
 
 if __name__ == '__main__':
-    connect_to_blockchains()
     app.run(port='5002')
