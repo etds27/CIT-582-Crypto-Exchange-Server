@@ -410,6 +410,7 @@ def trade():
 
             if valid_transaction:
                 log_message("Verified transaction %s" % d["tx_id"])
+                print("Verified transaction %s" % d["tx_id"])
                 process_order(d)
                 execute_txes(d)
 
