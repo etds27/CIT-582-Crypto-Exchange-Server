@@ -369,7 +369,6 @@ def trade():
     if request.method == "POST":
 
         content = request.get_json(silent=True)
-        log_message("PAYLOAD: %s" % str(content))
         print(f"content = {json.dumps(content)}")
         columns = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "platform",
                    "tx_id"]
@@ -397,6 +396,7 @@ def trade():
 
         if verify(sig, payload):
             log_message("Verified signature %s" % payload["tx_id"])
+            print("Verified signature %s" % payload["tx_id"])
             d = dict(sender_pk=payload["sender_pk"], receiver_pk=payload["receiver_pk"],
                      buy_currency=payload["buy_currency"], sell_currency=payload["sell_currency"],
                      buy_amount=payload["buy_amount"], sell_amount=payload["sell_amount"],
