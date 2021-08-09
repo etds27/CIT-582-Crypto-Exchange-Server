@@ -314,14 +314,14 @@ def insert_order(order):
                       buy_currency=order['buy_currency'],
                       sell_currency=order['sell_currency'],
                       buy_amount=order['buy_amount'],
-                        sell_amount=order['sell_amount'])"""
+                    sell_amount=order['sell_amount'])"""
     order_obj = Order(**order)
 
     tx_dict = dict(
-        platform=order.sell_currency,
-        receiver_pk=order.receiver_pk,
+        platform=order_obj.sell_currency,
+        receiver_pk=order_obj.receiver_pk,
         order_id=order_obj.id,
-        tx_id=order.tx_id
+        tx_id=order_obj.tx_id
     )
 
     tx = TX(**tx_dict)
