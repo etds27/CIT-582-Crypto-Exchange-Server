@@ -367,7 +367,9 @@ def address():
 @app.route('/trade', methods=['POST'])
 def trade():
     if request.method == "POST":
+
         content = request.get_json(silent=True)
+        log_message("PAYLOAD: %s" % str(content))
         print(f"content = {json.dumps(content)}")
         columns = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "platform",
                    "tx_id"]
@@ -394,6 +396,7 @@ def trade():
         payload = content["payload"]
 
         if verify(sig, payload):
+            log_message("Verified signature %s" % payload["tx_id"])
             d = dict(sender_pk=payload["sender_pk"], receiver_pk=payload["receiver_pk"],
                      buy_currency=payload["buy_currency"], sell_currency=payload["sell_currency"],
                      buy_amount=payload["buy_amount"], sell_amount=payload["sell_amount"],
@@ -406,6 +409,7 @@ def trade():
                 valid_transaction = verify_algorand_transaction(d, tx_id=d["tx_id"])
 
             if valid_transaction:
+                log_message("Verified transaction %s" % d["tx_id"])
                 process_order(d)
                 execute_txes(d)
 
