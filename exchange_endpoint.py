@@ -148,7 +148,7 @@ def log_message(d):
 def verify_ethereum_transaction(order, tx_id):
     _, exchange_pk = get_eth_keys(eth_mnemonic_secret)
     try:
-        tx = w3.eth.get_transaction(tx_id)
+        tx = g.w3.eth.get_transaction(tx_id)
         if not (
                 tx['value'] == order['sell_amount'] and
                 tx['from'] == order['sender_pk'] and
