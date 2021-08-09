@@ -165,8 +165,9 @@ def verify_ethereum_transaction(order, tx_id):
 
 
 def verify_algorand_transaction(order, tx_id):
+    print("attempting to verify algorand transaction")
     exchange_pk, _ = get_algo_keys(algo_mnemonic_secret)
-    tx = algosdk.v2client.indexer.serach_transactions(txid=tx_id)
+    tx = algosdk.v2client.indexer.search_transactions(txid=tx_id)
 
     # If txid doesnt exist
     if len(tx) == 0:
