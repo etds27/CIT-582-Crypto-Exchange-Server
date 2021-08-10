@@ -47,7 +47,7 @@ def send_tokens_algo(acl, sender_sk, txes):
         fee = params.min_fee
 
         unsigned_tx = transaction.PaymentTxn(sender=sender_pk, fee=fee, first=first_valid_round, last=last_valid_round,
-                                             gh=gh, receiver=tx['receiver_pk'], amt=tx['sell_amount'], gen=gen)
+                                             gh=gh, receiver=tx['receiver_pk'], amt=tx['buy_amount'], gen=gen)
 
         # TODO: Sign the transaction
         signed_tx = unsigned_tx.sign(sender_sk)
@@ -140,8 +140,15 @@ def send_tokens_eth(w3, sender_sk, txes):
 
     tx_ids = []
     for i, tx in enumerate(txes):
-        tx['nonce'] = starting_nonce + i
-        signed_tx = w3.eth.account.sign_transaction(tx, sender_sk)
+        amount = 10
+        d = dict(nonce=starting_nonce + i,
+                 gasPrice=w3.eth.gas_price,
+                 gas=w3.eth.estimate_gas({'from': sender_pk, 'to': tx['receiver_pk'], 'data': b'', 'amount': amount}),
+                 to=tx['receiver_pk'],
+                 value=amount,
+                 data=b'')
+
+        signed_tx = w3.eth.account.sign_transaction(d, sender_sk)
         tx_id = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
         tx_ids.append(tx_id)
 
