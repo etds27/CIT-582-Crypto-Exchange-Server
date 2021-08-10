@@ -135,8 +135,19 @@ def execute_txes(txes):
     #       1. Send tokens on the Algorand and eth testnets, appropriately
     #          We've provided the send_tokens_algo and send_tokens_eth skeleton methods in send_tokens.py
     #       2. Add all transactions to the TX table
-    send_tokens_eth(g.w3, eth_sk, eth_txes)
-    send_tokens_algo(g.acl, algo_sk, algo_txes)
+
+    tx_ids = []
+    tx_ids += send_tokens_eth(g.w3, eth_sk, eth_txes)
+    tx_ids += send_tokens_algo(g.acl, algo_sk, algo_txes)
+
+    for tx_id, tx in zip(tx_ids, eth_txes + algo_txes):
+        d = dict(platform=tx["platform"],
+                 receiver_pk=tx["receiver_pk"],
+                 order_id=tx["order_id"],
+                 tx_id=tx_id)
+        tx_obj = TX(**d)
+        g.session.add(tx_obj)
+    g.session.commit()
 
 
 def log_message(d):
@@ -480,7 +491,7 @@ def trade():
         # TODO: Be sure to return jsonify(True) or jsonify(False) depending on if the method was successful
 
         return jsonify(True)
-
+    return jsonify(False)
 
 @app.route('/order_book')
 def order_book():
