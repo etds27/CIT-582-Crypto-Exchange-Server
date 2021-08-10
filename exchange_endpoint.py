@@ -32,6 +32,7 @@ Account.enable_unaudited_hdwallet_features()
 acct, eth_mnemonic_secret = Account.create_with_mnemonic()
 algo_mnemonic_secret = "upper learn noodle occur rely soon shallow gossip ring orange sadness enhance gather tattoo pigeon gorilla ladder leader drive luggage cake fabric main abstract dress"
 
+
 @app.before_request
 def create_session():
     g.session = scoped_session(DBSession)
@@ -45,7 +46,6 @@ def shutdown_session(response_or_exc):
 
 
 from send_tokens import connect_to_algo, connect_to_eth, send_tokens_algo, send_tokens_eth
-
 
 """ Suggested helper methods """
 
@@ -184,7 +184,8 @@ def verify_algorand_transaction(order, tx_id):
             tx_dict['amt'] == order['sell_amount'] and
             tx_dict['receiver'] == exchange_pk
     ):
-        print("Unable to verify algorand transaction: %s == %s, %s == %s, %s == %s" % (tx_dict['sender'], order['sender_pk'], tx_dict['amt'],order['sell_amount'], tx_dict['receiver'], exchange_pk) )
+        print("Unable to verify algorand transaction: %s == %s, %s == %s, %s == %s" % (
+        tx_dict['sender'], order['sender_pk'], tx_dict['amt'], order['sell_amount'], tx_dict['receiver'], exchange_pk))
         return False
     return True
 
@@ -431,9 +432,7 @@ def trade():
                 print("Verified transaction %s" % d["tx_id"])
                 process_order(d)
 
-                txes = g.session.execute("SELECT * from txes WHERE 'tx_id' == %s" % payload["tx_id"])
-                print(txes)
-                execute_txes(txes)
+                execute_txes([d])
 
             else:
                 print("Transaction unable to be verified")
