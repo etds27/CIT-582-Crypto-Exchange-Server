@@ -263,14 +263,15 @@ def process_order(order):
     if not child_id == order_obj.id:
         orders.append(child_id)
 
-    headers = ["id", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "counterparty_id",
-               "creator_id, filled"]
+    # headers = ["id", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "counterparty_id",
+    #           "creator_id, filled"]
     # orders = g.session.execute("SELECT %s from orders" % ",".join(headers))
 
     return orders
 
 
 def process_matching_orders(order, matching_orders):
+    print("Processing matching orders for: %s" % str(order.id))
     # Sort the matching orders by exchange rate that benefits the buyer
     sorted_exchange = sorted(matching_orders, key=lambda x: x.sell_amount / x.buy_amount, reverse=False)
     child_id = order.id
@@ -292,6 +293,7 @@ def process_matching_orders(order, matching_orders):
 
         # If the seller is selling more than the buyer, create a new sell order on behalf of the seller
         if result.sell_amount > order.buy_amount:
+            print("result.sell_amount > order.buy_amount")
             new_sell_amt = result.sell_amount - order.buy_amount
             ratio = result.sell_amount / float(result.buy_amount)
             new_buy_amt = new_sell_amt // ratio
@@ -311,6 +313,7 @@ def process_matching_orders(order, matching_orders):
 
         # If the buyer is attempting to buy more than the seller is offering, create a new order on behalf of buyer
         elif result.sell_amount < order.buy_amount:
+            print("result.sell_amount < order.buy_amount")
             new_buy_amt = order.buy_amount - result.sell_amount
             ratio = order.buy_amount / float(order.sell_amount)
             new_sell_amount = new_buy_amt // ratio + (new_buy_amt % ratio > 0)
