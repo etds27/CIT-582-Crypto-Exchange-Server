@@ -469,7 +469,7 @@ def trade():
                 log_message("Verified transaction %s" % d["tx_id"])
 
                 order_ids = process_order(d)
-                print_order_book()
+                # print_order_book()
             else:
                 print("Transaction unable to be verified")
                 log_message(payload)
