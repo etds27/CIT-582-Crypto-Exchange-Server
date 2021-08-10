@@ -167,14 +167,11 @@ def verify_ethereum_transaction(order, tx_id):
 
 
 def verify_algorand_transaction(order, tx_id):
-    print("attempting to verify algorand transaction: %s" % tx_id)
+    # print("attempting to verify algorand transaction: %s" % tx_id)
     _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
-    print("Getting exchange account: %s" % str(exchange_pk))
-    print("Connected to indexer")
     connect_to_blockchains()
     send_tokens.wait_for_confirmation_algo(g.acl, tx_id)
     tx = g.icl.search_transactions(txid=tx_id)
-    print(tx, type(tx))
     # If txid doesnt exist
     if len(tx['transactions']) == 0:
         print("Transaction ID %s doesnt exist" % str(tx_id))
@@ -200,11 +197,11 @@ def verify_ethereum(sig, payload):
     try:
         recovered_address = eth_account.Account.recover_message(signable_message=signable_message, signature=sig)
     except:
-        print("Unable to recover ethereum address: %s" % str(payload))
+        # print("Unable to recover ethereum address: %s" % str(payload))
         return False
     if recovered_address == payload["sender_pk"]:
         return True
-    print("Addresses do not match: %s != %s | %s" % (recovered_address, payload["sender_pk"], str(payload)))
+    # print("Addresses do not match: %s != %s | %s" % (recovered_address, payload["sender_pk"], str(payload)))
     return False
 
 
@@ -212,7 +209,7 @@ def verify_algorand(sig, payload):
     jsonified_dict = json.dumps(payload)
     if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["sender_pk"]):
         return True
-    print("Unable to verify algorand signature: %s" % str(payload))
+    # print("Unable to verify algorand signature: %s" % str(payload))
     return False
 
 
@@ -398,6 +395,16 @@ def find_existing_matching_orders(order):
     return matching_orders
 
 
+
+def print_order_book():
+    result_keys = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount",
+                   "signature", "tx_id"]
+    statement = "SELECT %s FROM orders" % ",".join(result_keys)
+    orders = g.session.execute(statement)
+
+    # Add orders to data list sequentially
+    for order in orders:
+        print(order)
 """ End of helper methods """
 
 
@@ -425,7 +432,6 @@ def trade():
     if request.method == "POST":
         print()
         content = request.get_json(silent=True)
-        print(f"content = {json.dumps(content)}")
         columns = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "platform",
                    "tx_id"]
         fields = ["sig", "payload"]
@@ -453,7 +459,6 @@ def trade():
 
         if verify(sig, payload):
             log_message("Verified signature %s" % payload["tx_id"])
-            print("Verified signature %s" % payload["tx_id"])
             d = dict(sender_pk=payload["sender_pk"], receiver_pk=payload["receiver_pk"],
                      buy_currency=payload["buy_currency"], sell_currency=payload["sell_currency"],
                      buy_amount=payload["buy_amount"], sell_amount=payload["sell_amount"],
@@ -468,10 +473,9 @@ def trade():
 
             if valid_transaction:
                 log_message("Verified transaction %s" % d["tx_id"])
-                print("Verified transaction %s" % d["tx_id"])
 
                 order_ids = process_order(d)
-
+                print_order_book()
             else:
                 print("Transaction unable to be verified")
                 log_message(payload)
