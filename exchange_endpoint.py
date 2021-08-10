@@ -430,7 +430,10 @@ def trade():
                 log_message("Verified transaction %s" % d["tx_id"])
                 print("Verified transaction %s" % d["tx_id"])
                 process_order(d)
-                execute_txes([payload])
+
+                txes = g.session.execute("SELECT * from txes WHERE tx_id == %s" % payload["tx_id"])
+                print(txes)
+                execute_txes(txes)
 
             else:
                 print("Transaction unable to be verified")
