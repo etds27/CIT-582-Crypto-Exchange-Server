@@ -177,7 +177,8 @@ def verify_algorand_transaction(order, tx_id):
     if len(tx) == 0:
         print("Transaction ID %s doesnt exist" % str(tx_id))
         return False
-    tx_dict = tx
+    print(tx, type(tx))
+    tx_dict = tx[0].dictify()
 
     if not (
             tx_dict['sender'] == order['sender_pk'] and
