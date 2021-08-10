@@ -441,10 +441,12 @@ def trade():
                 txes = []
                 for id in order_ids:
                     result = g.session.execute("SELECT * FROM orders WHERE id == '%s'" % id)
-                    txes.append(dict(order_id=result.id,
-                                     receiver_pk=result.receiver_pk,
-                                     amount=result.buy_amount,
-                                     platform=result.sell_currency))
+                    print(result)
+                    for order in result:
+                        txes.append(dict(order_id=order.id,
+                                         receiver_pk=order.receiver_pk,
+                                         amount=order.buy_amount,
+                                         platform=order.sell_currency))
 
                 execute_txes(txes)
 
