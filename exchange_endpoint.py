@@ -160,7 +160,7 @@ def execute_txes(txes):
         tx_obj = TX(**d)
         g.session.add(tx_obj)
 
-        order = g.session.execute("SELECT * FROM orders WHERE id == '%s'" % tx['order_id']).first()
+        order = g.session.query(Order).filter(Order.id ==tx['order_id']).first()
         order.tx_id = tx_id
     g.session.commit()
 
