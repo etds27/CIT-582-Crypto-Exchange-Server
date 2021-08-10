@@ -152,7 +152,6 @@ def execute_txes(txes):
     tx_ids += send_tokens_algo(g.acl, algo_sk, algo_txes)
 
     for tx_id, tx in zip(tx_ids, eth_txes + algo_txes):
-        print("Adding txid: %s orderid: '%s' to db" % (tx_id, tx['order_id']))
         d = dict(platform=tx["platform"],
                  receiver_pk=tx["receiver_pk"],
                  order_id=tx["order_id"],
@@ -160,8 +159,11 @@ def execute_txes(txes):
         tx_obj = TX(**d)
         g.session.add(tx_obj)
 
-        order = g.session.query(Order).filter(Order.id ==tx['order_id']).first()
-        order.tx_id = tx_id
+        order = g.session.query(Order).filter(Order.id == tx['order_id']).first()
+        order.tx_id = str(tx_id)
+
+        print("Added txid: %s orderid: '%s' to db" % (tx_id, tx['order_id']))
+
     g.session.commit()
 
     for tx in g.session.execute("SELECT * FROM txes"):
