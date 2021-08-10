@@ -446,7 +446,7 @@ def trade():
                         txes.append(dict(order_id=order.id,
                                          receiver_pk=order.receiver_pk,
                                          amount=order.buy_amount,
-                                         platform=order.sell_currency))
+                                         platform=order.buy_currency))
 
                 execute_txes(txes)
 
