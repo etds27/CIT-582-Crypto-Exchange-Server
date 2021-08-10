@@ -485,7 +485,7 @@ def trade():
             d = dict(sender_pk=payload["sender_pk"], receiver_pk=payload["receiver_pk"],
                      buy_currency=payload["buy_currency"], sell_currency=payload["sell_currency"],
                      buy_amount=payload["buy_amount"], sell_amount=payload["sell_amount"],
-                     signature=sig, tx_id=payload["tx_id"])
+                     signature=sig)
 
             valid_transaction = False
             print("Created order dict %s" % str(d))
