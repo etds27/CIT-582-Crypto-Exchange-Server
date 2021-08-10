@@ -159,6 +159,9 @@ def execute_txes(txes):
                  tx_id=tx_id)
         tx_obj = TX(**d)
         g.session.add(tx_obj)
+
+        order = g.session.execute("SELECT * FROM orders WHERE id == '%s'" % tx['order_id']).first()
+        order.tx_id = tx_id
     g.session.commit()
 
     for tx in g.session.execute("SELECT * FROM txes"):
