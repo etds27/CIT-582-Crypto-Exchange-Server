@@ -307,12 +307,7 @@ def process_matching_orders(order, matching_orders):
         result = g.session.query(Order).filter(Order.id == result_id).first()
         print("Found matching transaction: %s" % str(result_id))
 
-        # Fill current order's and result order with counterparty and time info
-        tx_time = datetime.now()
-        result.filled = tx_time
-        order.filled = tx_time
-        result.counterparty_id = order.id
-        order.counterparty_id = result.id
+
 
         # If the seller is selling more than the buyer, create a new sell order on behalf of the seller
         if result.sell_amount > order.buy_amount:
@@ -364,6 +359,13 @@ def process_matching_orders(order, matching_orders):
                          amount=result.buy_amount,
                          platform=order.sell_currency)]
             execute_txes(txes)
+
+        # Fill current order's and result order with counterparty and time info
+        tx_time = datetime.now()
+        result.filled = tx_time
+        order.filled = tx_time
+        result.counterparty_id = order.id
+        order.counterparty_id = result.id
     else:
         print("No matching orders found")
 
