@@ -172,7 +172,7 @@ def verify_algorand_transaction(order, tx_id):
     print("Getting exchange account: %s" % str(exchange_pk))
     print("Connected to indexer")
     connect_to_blockchains()
-    send_tokens.wait_for_confirmation_algo(g.icl, tx_id)
+    send_tokens.wait_for_confirmation_algo(g.acl, tx_id)
     tx = g.icl.search_transactions(txid=tx_id)
     print(tx, type(tx))
     # If txid doesnt exist
