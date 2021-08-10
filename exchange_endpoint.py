@@ -206,7 +206,6 @@ def verify_ethereum(sig, payload):
 
 
 def verify_algorand(sig, payload):
-    payload.pop("platform")
     jsonified_dict = json.dumps(payload)
     if algosdk.util.verify_bytes(jsonified_dict.encode('utf-8'), sig, payload["sender_pk"]):
         return True
@@ -330,7 +329,17 @@ def process_matching_orders(order, matching_orders):
                          platform=order.sell_currency)]
             execute_txes(txes)
             child_id = process_order(new_order)
-
+        else:
+            print("result.sell_amount == order.buy_amount")
+            txes = [dict(order_id=order.id,
+                         receiver_pk=order.receiver_pk,
+                         amount=result.sell_amount,
+                         platform=order.buy_currency),
+                    dict(order_id=result.id,
+                         receiver_pk=result.receiver_pk,
+                         amount=result.buy_amount,
+                         platform=order.sell_currency)]
+            execute_txes(txes)
     # print()
     # print()
     return child_id
