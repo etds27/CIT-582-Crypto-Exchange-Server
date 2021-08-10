@@ -174,11 +174,11 @@ def verify_algorand_transaction(order, tx_id):
     tx = g.icl.search_transactions(txid=tx_id)
     print("Searched with indexer")
     # If txid doesnt exist
-    if len(tx) == 0:
+    if len(tx['transactions']) == 0:
         print("Transaction ID %s doesnt exist" % str(tx_id))
         return False
     print(tx, type(tx))
-    tx_dict = tx[0].dictify()
+    tx_dict = tx['transactions'][0].dictify()
 
     if not (
             tx_dict['sender'] == order['sender_pk'] and
