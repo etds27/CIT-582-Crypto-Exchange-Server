@@ -180,11 +180,11 @@ def verify_algorand_transaction(order, tx_id):
         print("Transaction ID %s doesnt exist" % str(tx_id))
         return False
 
-    tx_dict = tx['transactions'][0]
+    tx_dict = tx['transactions'][0]['payment-transaction']
 
     if not (
             tx_dict['sender'] == order['sender_pk'] and
-            tx_dict['amt'] == order['sell_amount'] and
+            tx_dict['amount'] == order['sell_amount'] and
             tx_dict['receiver'] == exchange_pk
     ):
         print("Unable to verify algorand transaction: %s == %s, %s == %s, %s == %s" % (
