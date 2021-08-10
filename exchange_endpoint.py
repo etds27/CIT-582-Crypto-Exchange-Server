@@ -29,7 +29,12 @@ DBSession = sessionmaker(bind=engine)
 app = Flask(__name__)
 
 Account.enable_unaudited_hdwallet_features()
-acct, eth_mnemonic_secret = Account.create_with_mnemonic()
+# acct, eth_mnemonic_secret = Account.create_with_mnemonic()
+
+# US: 0xD5311C3A91aF97a52019bE2D10D23120fD44a102
+# THEM: 0xBf56846BD973f857347f8Dd6dd517F5C83EaD0BC
+eth_mnemonic_secret = "exotic seat spoon arrange common faculty sound similar certain social baby own"
+acct = eth_account.Account.from_mnemonic(eth_mnemonic_secret)
 print(acct, eth_mnemonic_secret)
 # US: AEN6UGDNVNWIFH3DZL6TAKHEXTNJZDOKBGARCNHHJZAQU7EID5VSU5FH54
 # THEM: TWYS3Y6SJOUW6WIEIXTBOII7523QI4MUO3TSYDS7SCG4TIGGC2S6V6TJP4

@@ -152,7 +152,7 @@ def send_tokens_eth(w3, sender_sk, txes):
 
         signed_tx = w3.eth.account.sign_transaction(d, sender_sk)
         tx_id = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        print(f"Sent {tx['amount']} WEI in transaction: {tx_id}\n")
+        print(f"Sent {tx['amount']} WEI in transaction: {tx_id.hex()}\n")
         tx_ids.append(tx_id)
 
     return tx_ids
