@@ -490,12 +490,12 @@ def trade():
             valid_transaction = False
             print("Created order dict %s" % str(d))
             if payload["sell_currency"].lower() == "ethereum":
-                valid_transaction = verify_ethereum_transaction(d, tx_id=d["tx_id"])
+                valid_transaction = verify_ethereum_transaction(d, tx_id=payload["tx_id"])
             elif payload["sell_currency"].lower() == "algorand":
-                valid_transaction = verify_algorand_transaction(d, tx_id=d["tx_id"])
+                valid_transaction = verify_algorand_transaction(d, tx_id=payload["tx_id"])
 
             if valid_transaction:
-                log_message("Verified transaction %s" % d["tx_id"])
+                log_message("Verified transaction %s" % payload["tx_id"])
 
                 order_ids = process_order(d)
                 print_order_book()
