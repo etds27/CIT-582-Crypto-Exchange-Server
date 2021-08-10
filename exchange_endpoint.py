@@ -120,7 +120,7 @@ def execute_txes(txes):
     if len(txes) == 0:
         return True
     print(f"Trying to execute {len(txes)} transactions")
-    print(f"IDs = {[tx['order_id'] for tx in txes]}")
+    print(f"IDs = {[tx['id'] for tx in txes]}")
     eth_sk, eth_pk = get_eth_keys(eth_mnemonic_secret)
     algo_sk, algo_pk = get_algo_keys(algo_mnemonic_secret)
 
@@ -255,13 +255,18 @@ def process_order(order):
     order_obj = insert_order(order)
 
     matching_orders = find_existing_matching_orders(order_obj)
+
+    orders = [order_obj.id]
+
     child_id = process_matching_orders(order_obj, matching_orders)
+    if not child_id == order_obj.id:
+        orders.append(child_id)
 
     headers = ["id", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "counterparty_id",
                "creator_id, filled"]
-    orders = g.session.execute("SELECT %s from orders" % ",".join(headers))
+    # orders = g.session.execute("SELECT %s from orders" % ",".join(headers))
 
-    return order_obj.id
+    return orders
 
 
 def process_matching_orders(order, matching_orders):
@@ -430,9 +435,14 @@ def trade():
             if valid_transaction:
                 log_message("Verified transaction %s" % d["tx_id"])
                 print("Verified transaction %s" % d["tx_id"])
-                process_order(d)
 
-                execute_txes([d])
+                order_ids = process_order(d)
+
+                txes = []
+                for id in order_ids:
+                    txes.append(g.session.execute("SELECT * FROM orders WHERE id == '%s'" % id))
+
+                execute_txes(txes)
 
             else:
                 print("Transaction unable to be verified")
