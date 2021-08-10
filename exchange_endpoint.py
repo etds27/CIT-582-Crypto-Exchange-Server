@@ -30,6 +30,9 @@ app = Flask(__name__)
 
 Account.enable_unaudited_hdwallet_features()
 acct, eth_mnemonic_secret = Account.create_with_mnemonic()
+print(acct, eth_mnemonic_secret)
+# US: AEN6UGDNVNWIFH3DZL6TAKHEXTNJZDOKBGARCNHHJZAQU7EID5VSU5FH54
+# THEM: TWYS3Y6SJOUW6WIEIXTBOII7523QI4MUO3TSYDS7SCG4TIGGC2S6V6TJP4
 algo_mnemonic_secret = "upper learn noodle occur rely soon shallow gossip ring orange sadness enhance gather tattoo pigeon gorilla ladder leader drive luggage cake fabric main abstract dress"
 
 

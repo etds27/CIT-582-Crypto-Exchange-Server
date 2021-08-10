@@ -140,6 +140,8 @@ def send_tokens_eth(w3, sender_sk, txes):
 
     tx_ids = []
     for i, tx in enumerate(txes):
+        print(f"Sending {tx['amount']} WEI from {sender_pk} to {tx['receiver_pk']}")
+
         amount = tx["amount"]
         d = dict(nonce=starting_nonce + i,
                  gasPrice=w3.eth.gas_price,
@@ -150,6 +152,7 @@ def send_tokens_eth(w3, sender_sk, txes):
 
         signed_tx = w3.eth.account.sign_transaction(d, sender_sk)
         tx_id = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        print(f"Sent {tx['amount']} WEI in transaction: {tx_id}\n")
         tx_ids.append(tx_id)
 
     return tx_ids
