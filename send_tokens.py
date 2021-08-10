@@ -58,7 +58,7 @@ def send_tokens_algo(acl, sender_sk, txes):
             # TODO: Send the transaction to the testnet
 
             acl.send_transaction(signed_tx)
-            tx_id = signed_tx.get_txid()
+            tx_id = signed_tx.transaction.get_txid()
             txinfo = wait_for_confirmation_algo(acl, txid=tx_id)
             print(f"Sent {tx['amount']} microalgo in transaction: {tx_id}\n")
             tx_ids.append(tx_id)
@@ -140,7 +140,7 @@ def send_tokens_eth(w3, sender_sk, txes):
 
     tx_ids = []
     for i, tx in enumerate(txes):
-        amount = 10
+        amount = tx["amount"]
         d = dict(nonce=starting_nonce + i,
                  gasPrice=w3.eth.gas_price,
                  gas=w3.eth.estimate_gas({'from': sender_pk, 'to': tx['receiver_pk'], 'data': b'', 'amount': amount}),
