@@ -307,6 +307,7 @@ def process_matching_orders(order, matching_orders):
                          receiver_pk=result.receiver_pk,
                          amount=order.sell_amount,
                          platform=order.sell_currency)]
+            [g.session.add(TX(**tx)) for tx in txes]
             execute_txes(txes)
             child_id = process_order(new_order)
 
@@ -327,6 +328,7 @@ def process_matching_orders(order, matching_orders):
                          receiver_pk=result.receiver_pk,
                          amount=result.buy_amount,
                          platform=order.sell_currency)]
+            [g.session.add(TX(**tx)) for tx in txes]
             execute_txes(txes)
             child_id = process_order(new_order)
         else:
@@ -339,9 +341,11 @@ def process_matching_orders(order, matching_orders):
                          receiver_pk=result.receiver_pk,
                          amount=result.buy_amount,
                          platform=order.sell_currency)]
+            [g.session.add(TX(**tx)) for tx in txes]
             execute_txes(txes)
     # print()
     # print()
+    g.session.commit()
     return child_id
 
 
@@ -354,17 +358,7 @@ def insert_order(order):
                     sell_amount=order['sell_amount'])"""
     order_obj = Order(**order)
 
-    tx_dict = dict(
-        platform=order_obj.sell_currency,
-        receiver_pk=order_obj.receiver_pk,
-        order_id=order_obj.id,
-        tx_id=order_obj.tx_id
-    )
-
-    tx = TX(**tx_dict)
-
     g.session.add(order_obj)
-    g.session.add(tx)
     g.session.flush()
     g.session.commit()
 
