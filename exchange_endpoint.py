@@ -141,6 +141,7 @@ def execute_txes(txes):
     tx_ids += send_tokens_algo(g.acl, algo_sk, algo_txes)
 
     for tx_id, tx in zip(tx_ids, eth_txes + algo_txes):
+        print("Adding txid: %s orderid: '%s' to db" % (tx_id, tx['order_id']))
         d = dict(platform=tx["platform"],
                  receiver_pk=tx["receiver_pk"],
                  order_id=tx["order_id"],
@@ -354,8 +355,9 @@ def process_matching_orders(order, matching_orders):
                          amount=result.buy_amount,
                          platform=order.sell_currency)]
             execute_txes(txes)
-    # print()
-    # print()
+    else:
+        print("No matching orders found")
+
     g.session.commit()
     return child_id
 
@@ -372,6 +374,7 @@ def insert_order(order):
     g.session.add(order_obj)
     g.session.flush()
     g.session.commit()
+    print("Created order: '%s'" % str(order_obj.id))
 
     return order_obj
 
