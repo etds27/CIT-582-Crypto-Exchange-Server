@@ -185,7 +185,8 @@ def verify_algorand_transaction(order, tx_id):
             tx_dict['receiver'] == exchange_pk
     ):
         print("Unable to verify algorand transaction: %s == %s, %s == %s, %s == %s" % (
-        tx_dict['sender'], order['sender_pk'], tx_dict['amt'], order['sell_amount'], tx_dict['receiver'], exchange_pk))
+            tx_dict['sender'], order['sender_pk'], tx_dict['amt'], order['sell_amount'], tx_dict['receiver'],
+            exchange_pk))
         return False
     return True
 
@@ -297,6 +298,15 @@ def process_matching_orders(order, matching_orders):
             new_order = dict(buy_currency=result.buy_currency, sell_currency=result.sell_currency,
                              buy_amount=new_buy_amt, sell_amount=new_sell_amt, sender_pk=result.sender_pk,
                              receiver_pk=result.receiver_pk, creator_id=result.id)
+            txes = [dict(order_id=order.id,
+                         receiver_pk=order.receiver_pk,
+                         amount=order.buy_amount,
+                         platform=order.buy_currency),
+                    dict(order_id=result.id,
+                         receiver_pk=result.receiver_pk,
+                         amount=order.sell_amount,
+                         platform=order.sell_currency)]
+            execute_txes(txes)
             child_id = process_order(new_order)
 
         # If the buyer is attempting to buy more than the seller is offering, create a new order on behalf of buyer
@@ -307,6 +317,15 @@ def process_matching_orders(order, matching_orders):
             new_order = dict(buy_currency=order.buy_currency, sell_currency=order.sell_currency,
                              buy_amount=new_buy_amt, sell_amount=new_sell_amount, sender_pk=order.sender_pk,
                              receiver_pk=order.receiver_pk, creator_id=order.id)
+            txes = [dict(order_id=order.id,
+                         receiver_pk=order.receiver_pk,
+                         amount=result.sell_amount,
+                         platform=order.buy_currency),
+                    dict(order_id=result.id,
+                         receiver_pk=result.receiver_pk,
+                         amount=result.buy_amount,
+                         platform=order.sell_currency)]
+            execute_txes(txes)
             child_id = process_order(new_order)
 
     # print()
@@ -437,18 +456,6 @@ def trade():
                 print("Verified transaction %s" % d["tx_id"])
 
                 order_ids = process_order(d)
-
-                txes = []
-                for id in order_ids:
-                    result = g.session.execute("SELECT * FROM orders WHERE id == '%s'" % id)
-                    print(result)
-                    for order in result:
-                        txes.append(dict(order_id=order.id,
-                                         receiver_pk=order.receiver_pk,
-                                         amount=order.buy_amount,
-                                         platform=order.buy_currency))
-
-                execute_txes(txes)
 
             else:
                 print("Transaction unable to be verified")
