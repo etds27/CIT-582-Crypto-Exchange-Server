@@ -120,7 +120,7 @@ def execute_txes(txes):
     if len(txes) == 0:
         return True
     print(f"Trying to execute {len(txes)} transactions")
-    print(f"IDs = {[tx['id'] for tx in txes]}")
+    print(f"IDs = {[tx['order_id'] for tx in txes]}")
     eth_sk, eth_pk = get_eth_keys(eth_mnemonic_secret)
     algo_sk, algo_pk = get_algo_keys(algo_mnemonic_secret)
 
