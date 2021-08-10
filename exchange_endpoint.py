@@ -171,13 +171,13 @@ def verify_algorand_transaction(order, tx_id):
     _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
     print("Getting exchange account: %s" % str(exchange_pk))
     print("Connected to indexer")
-    tx = g.icl.search_transactions(txid=tx_id)
-    print("Searched with indexer")
+    tx = g.icl.transaction(txid=tx_id)
+    print(tx, type(tx))
     # If txid doesnt exist
     if len(tx['transactions']) == 0:
         print("Transaction ID %s doesnt exist" % str(tx_id))
         return False
-    print(tx, type(tx))
+
     tx_dict = tx['transactions'][0].dictify()
 
     if not (
