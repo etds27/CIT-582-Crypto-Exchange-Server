@@ -405,11 +405,11 @@ def find_existing_matching_orders(order):
 
 
 def print_order_book():
-    result_keys = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount",
-                   "signature", "tx_id"]
+    result_keys = ["id", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount", "tx_id", "counterparty_id", "filled"]
     statement = "SELECT %s FROM orders" % ",".join(result_keys)
     orders = g.session.execute(statement)
 
+    print(",".join(result_keys))
     # Add orders to data list sequentially
     for order in orders:
         print(order)
