@@ -431,7 +431,7 @@ def trade():
                 print("Verified transaction %s" % d["tx_id"])
                 process_order(d)
 
-                txes = g.session.execute("SELECT * from txes WHERE tx_id == %s" % payload["tx_id"])
+                txes = g.session.execute("SELECT * from txes WHERE 'tx_id' == %s" % payload["tx_id"])
                 print(txes)
                 execute_txes(txes)
 
