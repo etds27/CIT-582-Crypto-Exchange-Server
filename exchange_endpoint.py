@@ -350,7 +350,6 @@ def process_matching_orders(order, matching_orders):
                          receiver_pk=result.receiver_pk,
                          amount=result.buy_amount,
                          platform=order.sell_currency)]
-            [g.session.add(TX(**tx)) for tx in txes]
             execute_txes(txes)
     # print()
     # print()
@@ -398,7 +397,6 @@ def find_existing_matching_orders(order):
     return matching_orders
 
 
-
 def print_order_book():
     result_keys = ["sender_pk", "receiver_pk", "buy_currency", "sell_currency", "buy_amount", "sell_amount",
                    "signature", "tx_id"]
@@ -408,6 +406,8 @@ def print_order_book():
     # Add orders to data list sequentially
     for order in orders:
         print(order)
+
+
 """ End of helper methods """
 
 
@@ -490,6 +490,7 @@ def trade():
 
         return jsonify(True)
     return jsonify(False)
+
 
 @app.route('/order_book')
 def order_book():
