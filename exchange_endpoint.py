@@ -35,11 +35,14 @@ Account.enable_unaudited_hdwallet_features()
 # THEM: 0xBf56846BD973f857347f8Dd6dd517F5C83EaD0BC
 eth_mnemonic_secret = "exotic seat spoon arrange common faculty sound similar certain social baby own"
 acct = eth_account.Account.from_mnemonic(eth_mnemonic_secret)
-print(acct, eth_mnemonic_secret)
+print(f"Exchange ETH PK: {acct._address}")
+print(f"Client ETH PK:   0xBf56846BD973f857347f8Dd6dd517F5C83EaD0BC")
+
 # US: AEN6UGDNVNWIFH3DZL6TAKHEXTNJZDOKBGARCNHHJZAQU7EID5VSU5FH54
 # THEM: TWYS3Y6SJOUW6WIEIXTBOII7523QI4MUO3TSYDS7SCG4TIGGC2S6V6TJP4
 algo_mnemonic_secret = "upper learn noodle occur rely soon shallow gossip ring orange sadness enhance gather tattoo pigeon gorilla ladder leader drive luggage cake fabric main abstract dress"
-
+print(f"Exchange ALGO PK: AEN6UGDNVNWIFH3DZL6TAKHEXTNJZDOKBGARCNHHJZAQU7EID5VSU5FH54")
+print(f"Client ALGO PK:   TWYS3Y6SJOUW6WIEIXTBOII7523QI4MUO3TSYDS7SCG4TIGGC2S6V6TJP4")
 
 @app.before_request
 def create_session():
@@ -307,7 +310,12 @@ def process_matching_orders(order, matching_orders):
         result = g.session.query(Order).filter(Order.id == result_id).first()
         print("Found matching transaction: %s" % str(result_id))
 
-
+        # Fill current order's and result order with counterparty and time info
+        tx_time = datetime.now()
+        result.filled = tx_time
+        order.filled = tx_time
+        result.counterparty_id = order.id
+        order.counterparty_id = result.id
 
         # If the seller is selling more than the buyer, create a new sell order on behalf of the seller
         if result.sell_amount > order.buy_amount:
@@ -360,12 +368,7 @@ def process_matching_orders(order, matching_orders):
                          platform=order.sell_currency)]
             execute_txes(txes)
 
-        # Fill current order's and result order with counterparty and time info
-        tx_time = datetime.now()
-        result.filled = tx_time
-        order.filled = tx_time
-        result.counterparty_id = order.id
-        order.counterparty_id = result.id
+
     else:
         print("No matching orders found")
 
