@@ -297,6 +297,7 @@ def process_matching_orders(order, matching_orders):
         id_idx = find_column_id_by_name("id")
         result_id = sorted_exchange[0][id_idx]
         result = g.session.query(Order).filter(Order.id == result_id).first()
+        print("Found matching transaction: %s" % str(result_id))
 
         # Fill current order's and result order with counterparty and time info
         tx_time = datetime.now()
