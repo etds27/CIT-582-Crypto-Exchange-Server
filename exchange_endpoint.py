@@ -149,6 +149,9 @@ def execute_txes(txes):
         g.session.add(tx_obj)
     g.session.commit()
 
+    for tx in g.session.execute("SELECT * FROM txes"):
+        print(tx)
+
 
 def log_message(d):
     log = Log(message=json.dumps(d))
