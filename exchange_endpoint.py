@@ -167,7 +167,7 @@ def verify_ethereum_transaction(order, tx_id):
 
 
 def verify_algorand_transaction(order, tx_id):
-    print("attempting to verify algorand transaction")
+    print("attempting to verify algorand transaction: %s" % tx_id)
     _, exchange_pk = get_algo_keys(algo_mnemonic_secret)
     print("Getting exchange account: %s" % str(exchange_pk))
     print("Connected to indexer")
